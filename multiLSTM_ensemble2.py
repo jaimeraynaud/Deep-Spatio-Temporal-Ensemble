@@ -46,9 +46,9 @@ class multiLSTM(object):
         self.batchSize = 3
         activation = ['sigmoid',   "tanh",   "relu", 'linear']
         self.activation = activation[2]
-        realRun = 1 #Change from 0 to 1 if you want to use a 0.5% of the data to train
+        realRun = 0 #Change from 0 to 1 if you want to use a 0.5% of the data to train
         #          model number :           1   2   3   4   5   6
-        self.epochs, self.dataUsed = [[15, 17, 15, 17, 15, 15], 1] if realRun else [[ 1, 1, 1, 1, 1, 1] , 0.1]# percentage of data used for training(saving time for debuging)
+        self.epochs, self.dataUsed = [[15, 17, 15, 17, 15, 15], 1] if realRun else [[ 1, 1, 1, 1, 1, 1] , 0.01]# percentage of data used for training(saving time for debuging)
         self.trainDataRate = 0.8
         self.num_hours = int(df.shape[0]*self.dataUsed)#Trying to parametrize
 
@@ -394,9 +394,9 @@ class multiLSTM2(object):
         self.batchSize = 3
         activation = ['sigmoid',   "tanh",   "relu", 'linear']
         self.activation = activation[1] ##################################################### MODIFICATION FROM 2 TO 1 RELU TO TANH
-        realRun = 1 #Change from 0 to 1 if you want to use a 0.5% of the data to train
+        realRun = 0 #Change from 0 to 1 if you want to use a 0.5% of the data to train
         #          model number :           1   2   3   4   5   6
-        self.epochs, self.dataUsed = [[15, 17, 15, 17, 15, 15], 1] if realRun else [[ 1, 1, 1, 1, 1, 1] , 0.1]# percentage of data used for training(saving time for debuging)
+        self.epochs, self.dataUsed = [[15, 17, 15, 17, 15, 15], 1] if realRun else [[ 1, 1, 1, 1, 1, 1] , 0.01]# percentage of data used for training(saving time for debuging)
         self.trainDataRate = 0.8
         self.num_hours = int(df.shape[0]*self.dataUsed)
         #print('Testing !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',self.epochs, self.trainDataRate) #I have changed from 1 to 0.715 since 6000 out of 
@@ -746,9 +746,9 @@ class multiLSTM3(object):
         self.batchSize = 3 ####################################################################### MODIFICATION LSTM 3, from batch size of 3 to 64
         activation = ['sigmoid',   "tanh",   "relu", 'linear']
         self.activation = activation[2]
-        realRun = 1 #Change from 0 to 1 if you want to use a 0.5% of the data to train
+        realRun = 0 #Change from 0 to 1 if you want to use a 0.5% of the data to train
         #          model number :           1   2   3   4   5   6
-        self.epochs, self.dataUsed = [[15, 17, 15, 17, 15, 15], 1] if realRun else [[ 1, 1, 1, 1, 1, 1] , 0.1]# percentage of data used for training(saving time for debuging)
+        self.epochs, self.dataUsed = [[15, 17, 15, 17, 15, 15], 1] if realRun else [[ 1, 1, 1, 1, 1, 1] , 0.01]# percentage of data used for training(saving time for debuging)
         self.trainDataRate = 0.8
         self.num_hours = int(df.shape[0]*self.dataUsed)
         #print('Testing !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',self.epochs, self.trainDataRate) #I have changed from 1 to 0.715 since 6000 out of 
@@ -1221,7 +1221,7 @@ def drawGraphStation_stacked(members, yPred, yTest, station, visualise = 1, ax =
     yTest = yTest[:, station]
     denormalYTest = member0.denormalize(yTest)
     denormalPredicted = member0.denormalize(yPred[:, station])
-    np.save('output/stacked_'+file,denormalPredicted)
+    #np.save('output/stacked_'+file,denormalPredicted)
     mae, rmse, nrmse_maxMin, nrmse_mean  = errorMeasures_stacked(denormalYTest, denormalPredicted)
     print('station %s : MAE = %7.7s   RMSE = %7.7s    nrmse_maxMin = %7.7s   nrmse_mean = %7.7s'%(station+1, mae, rmse, nrmse_maxMin, nrmse_mean ))
 
@@ -1265,7 +1265,7 @@ if original:
     file = 'MS_winds.mat'
     # DeepForecaste = multiLSTM(file)
     # DeepForecaste.run()
-    members, results = load_all_models('data/'+file)
+    members, results = load_all_models('used_data/'+file)
     #models_predictions_train,  models_predictions_val= stacked_dataset(members)
     stacked_models = fit_stacked_model(members)
     yPred = stacked_prediction(members, stacked_models)
@@ -1284,47 +1284,27 @@ else:
         print('\n')
         contador = 1
         ids, mae, rmse, nrmse_maxMin, nrmse_mean = [], [], [], [], []
-        for file in os.listdir('data'):
+        for file in os.listdir('used_data'):
             print('\n')
             print('===============================================================================================================================')
             print('Experiment number: ',contador,'/ 31')
             print('Dataset: ',file)
             print('===============================================================================================================================')
             print('\n')
-            members, results = load_all_models('data/'+file)
+            members, results = load_all_models('used_data/'+file)
             stacked_model = fit_stacked_model(members)
             yPred = stacked_prediction(members, stacked_model)
 
             errMean = drawGraphAllStations_stacked(members, yPred, members[0].yVal, members[0].num_stations)
 
-            df = pd.read_csv('output/results_def.csv')
-            id = file.replace('.mat', '')
+            # df = pd.read_csv('output/results_def.csv')
+            # id = file.replace('.mat', '')
             
-            # df.loc[df.dataset == id, 'mae'] = results[0][0]
-            # df.loc[df.dataset == id, 'rmse'] = results[0][1]
-            # df.loc[df.dataset == id, 'nrmse_mean'] = results[0][2]
-            # df.loc[df.dataset == id, 'nrmse_maxMin'] = results[0][3]
-
-            # df.loc[df.dataset == id, 'mae_2'] = results[1][0]
-            # df.loc[df.dataset == id, 'rmse_2'] = results[1][1]
-            # df.loc[df.dataset == id, 'nrmse_mean_2'] = results[1][2]
-            # df.loc[df.dataset == id, 'nrmse_maxMin_2'] = results[1][3]
-
-            # df.loc[df.dataset == id, 'mae_3'] = results[2][0]
-            # df.loc[df.dataset == id, 'rmse_3'] = results[2][1]
-            # df.loc[df.dataset == id, 'nrmse_mean_3'] = results[2][2]
-            # df.loc[df.dataset == id, 'nrmse_maxMin_3'] = results[2][3]
-
-            # df.loc[df.dataset == id, 'mae_stacked'] = errMean[0]
-            # df.loc[df.dataset == id, 'rmse_stacked'] = errMean[1]
-            # df.loc[df.dataset == id, 'nrmse_mean_stacked'] = errMean[2]
-            # df.loc[df.dataset == id, 'nrmse_maxMin_stacked'] = errMean[3]
-            row = {'id':id ,'mae': results[0][0], 'rmse': results[0][1], 'nrmse_mean': results[0][2], 'nrmse_maxMin':results[0][3], 'mae_2': results[1][0], 'rmse_2': results[1][1], 'nrmse_mean_2': results[1][2], 'nrmse_maxMin_2':results[1][3], 'mae_3': results[2][0], 'rmse_3': results[2][1], 'nrmse_mean_3': results[2][2], 'nrmse_maxMin_3':results[2][3], 'mae_stacked': errMean[0], 'rmse_stacked': errMean[1], 'nrmse_mean_stacked': errMean[2], 'nrmse_maxMin_stacked': errMean[3]}
-            df = df.append(row, ignore_index = True)
-            df.to_csv('output/results_def.csv', index = False)
+            # row = {'id':id ,'mae': results[0][0], 'rmse': results[0][1], 'nrmse_mean': results[0][2], 'nrmse_maxMin':results[0][3], 'mae_2': results[1][0], 'rmse_2': results[1][1], 'nrmse_mean_2': results[1][2], 'nrmse_maxMin_2':results[1][3], 'mae_3': results[2][0], 'rmse_3': results[2][1], 'nrmse_mean_3': results[2][2], 'nrmse_maxMin_3':results[2][3], 'mae_stacked': errMean[0], 'rmse_stacked': errMean[1], 'nrmse_mean_stacked': errMean[2], 'nrmse_maxMin_stacked': errMean[3]}
+            # df = df.append(row, ignore_index = True)
+            # df.to_csv('output/results_def.csv', index = False)
             #ids.append(file.replace('.mat', '')), mae.append(errMean[0]), rmse.append(errMean[1]), nrmse_maxMin.append(errMean[2]), nrmse_mean.append(errMean[3])
             contador+=1
-# means copy paste in excel results.csv: 4.783423201	4.231984641	4.73229977	1.387896327	5.697113444	5.22084601	5.659446881	1.840254581	36.20262953	33.07274125	35.97523014	11.73074147	95.38847758	88.38208312	94.98086852	33.53231674
 
     
 
